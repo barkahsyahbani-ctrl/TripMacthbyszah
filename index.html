@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripMatch</title>
+<style>
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('background1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color:#333;
+}
+header {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:15px;
+  background: rgba(0,0,0,0.4);
+  color:white;
+}
+header img { width:70px; height:70px; border-radius:50%; object-fit:cover; }
+header h1 { font-size:32px; font-weight:bold; margin:0; }
+
+.filter {
+  max-width:400px;
+  margin:20px auto;
+  background: rgba(255,255,255,0.85);
+  padding:20px;
+  border-radius:12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.filter label { display:block; font-weight:bold; margin-top:10px; }
+.filter input, .filter select {
+  width:100%;
+  padding:15px;
+  margin-top:5px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-weight:bold;
+  box-sizing: border-box;
+  font-size:16px;
+}
+.filter button {
+  width:48%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+  font-size:16px;
+}
+.btn-reset { background:#999; color:white; margin-left:4%; }
+
+.tujuan-container {
+  max-width:95%;
+  margin:20px auto;
+  display:flex;
+  justify-content:flex-start;
+  gap:15px;
+  overflow-x:auto;
+  padding-bottom:10px;
+  display:none;
+}
+.tujuan-box {
+  min-width:150px; 
+  height:150px;
+  background: rgba(255,255,255,0.95);
+  border-radius:8px;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  flex-shrink:0; 
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  font-weight:bold;
+}
+.tujuan-container {
+  max-width:95%;
+  margin:20px auto;
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  overflow-x:auto;
+  padding-bottom:10px;
+  display:none;
+}
+.tujuan-box {
+  min-width:150px; 
+  height:150px;
+  background: rgba(255,255,255,0.95);
+  border-radius:8px;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  flex-shrink:0; 
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  font-weight:bold;
+}
+.tujuan-box img {
+  width:100%;
+  height:100px;
+  object-fit:cover;
+  border-radius:5px;
+}
+.tujuan-box p {
+  margin:5px 0 0 0;
+  font-weight:bold;
+  font-size:14px;
+}
+
+.orang-container {
+  max-width:900px;
+  margin:20px auto;
+  display:none;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+.orang-card {
+  background: rgba(255,255,255,0.6);
+  border-radius:8px;
+  padding:10px;
+  margin-bottom:10px;
+  width:220px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  backdrop-filter: blur(5px);
+}
+.orang-card img { width:80px; height:80px; border-radius:50%; object-fit:cover; margin-bottom:10px; }
+.orang-card h3 { margin:5px 0; font-weight:bold; }
+.orang-card p { margin:3px 0; font-size:13px; }
+
+.watermark {
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:20px;
+  font-weight:bold;
+  color: rgba(255, 255, 255,1);
+  text-transform:uppercase;
+  pointer-events:none;
+  user-select:none;
+}
+
+@media(max-width:600px){
+  .filter input, .filter select, .filter button {
+    font-size:18px;
+    padding:15px;
+  }
+  .orang-card { width:100%; }
+  header h1 { font-size:24px; }
+  header img { width:60px; height:60px; }
+  .watermark { font-size:16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.jpg" alt="Logo">
+  <h1>TripMatch</h1>
+</header>
+
+<div class="filter">
+  <label for="start-date">Tanggal Pergi</label>
+  <input type="date" id="start-date">
+  <label for="end-date">Tanggal Pulang</label>
+  <input type="date" id="end-date">
+  <label for="interest">Pilih Destinasi</label>
+  <select id="interest" onchange="showTujuan()">
+    <option value="">Semua</option>
+    <option value="Alam">Alam</option>
+    <option value="Budaya">Budaya</option>
+    <option value="Kuliner">Kuliner</option>
+    <option value="Sejarah">Sejarah</option>
+    <option value="Belanja">Belanja</option>
+    <option value="Pantai">Pantai</option>
+  </select>
+  <button class="btn-reset" onclick="resetForm()">Reset</button>
+</div>
+
+<div class="tujuan-container" id="tujuanContainer"></div>
+<div class="orang-container" id="orangContainer"></div>
+<div class="watermark">#INENGINEERINGWETRUST</div>
+
+<script>
+const tujuanPerMinat = {
+  "Alam":["Gunung Bromo","Kawah Putih","Pantai Selatan"],
+  "Budaya":["Candi Borobudur","Keraton Yogyakarta","Museum Nasional"],
+  "Kuliner":["Pasar Tradisional","Food Festival","Kampoeng Kuliner"],
+  "Sejarah":["Benteng Vredeburg","Museum Fatahillah"],
+  "Belanja":["Pasar Tanah Abang","Mall Grand Indonesia"],
+  "Pantai":["Pantai Kuta","Pantai Parangtritis"]
+};
+
+const avatars = {female:"avatar_woman.png", male:"avatar_man.png"};
+const femaleNames = ["Ayu","Siti","Rina","Lina","Maya","Dewi","Putri","Nina","Tia","Indah","Wulan","Ratna","Fira","Rani","Mira"];
+const maleNames = ["Budi","Andi","Agus","Doni","Fajar","Rizky","Hendra","Joko","Arif","Bayu","Tono","Fadil","Rian","Dimas","Yoga"];
+
+const orangData = {};
+let phoneCounter = 810000000;
+
+// 🟡 Buat data dari 1 sampai 30 Oktober 2025, tiap tujuan ada 3 orang
+for(const minat in tujuanPerMinat){
+  tujuanPerMinat[minat].forEach((tujuan, idx)=>{
+    orangData[tujuan] = [];
+    for(let day=1; day<=30; day++){
+      for(let i=0; i<3; i++){
+        const gender = (i % 2 === 0) ? "Perempuan" : "Laki-laki";
+        const nameList = (gender === "Perempuan") ? femaleNames : maleNames;
+        const name = nameList[(day + i + idx) % nameList.length];
+        const dateStr = `2025-10-${String(day).padStart(2,'0')}`;
+        const avatar = avatars[gender==="Perempuan"?"female":"male"];
+        const startDate = dateStr;
+        const endDate = dateStr;
+        orangData[tujuan].push({
+          name, gender, avatar,
+          phone: "08" + phoneCounter++,
+          dateStart: startDate,
+          dateEnd: endDate
+        });
+      }
+    }
+  });
+}
+
+function showTujuan(){
+  const start = document.getElementById("start-date").value;
+  const end = document.getElementById("end-date").value;
+  if(!start || !end){ alert("Isi tanggal awal & akhir terlebih dahulu"); return; }
+  const minat = document.getElementById("interest").value;
+  const container = document.getElementById("tujuanContainer");
+  container.innerHTML="";
+  document.getElementById("orangContainer").innerHTML="";
+  document.getElementById("orangContainer").style.display="none";
+
+  if(!minat){ container.style.display="none"; return; }
+  container.style.display="flex";
+  tujuanPerMinat[minat].forEach(tujuan=>{
+    const box = document.createElement("div");
+    box.className="tujuan-box";
+    const imgPath = tujuan.toLowerCase().replace(/ /g,"_")+".jpg";
+    box.innerHTML=`<img src="${imgPath}" alt="${tujuan}"><p>${tujuan}</p>`;
+    box.onclick=()=>showOrang(tujuan);
+    container.appendChild(box);
+  });
+}
+
+function showOrang(tujuan){
+  const startInput = document.getElementById("start-date").value;
+  const endInput = document.getElementById("end-date").value;
+  if(!startInput || !endInput){ alert("Isi tanggal awal & akhir"); return; }
+
+  const orangContainer = document.getElementById("orangContainer");
+  orangContainer.innerHTML="";
+  orangContainer.style.display="flex";
+
+  const startDate = new Date(startInput);
+  const endDate = new Date(endInput);
+
+  if(!orangData[tujuan]) return;
+
+  let found = false;
+  orangData[tujuan].forEach(o=>{
+    const oDateStart = new Date(o.dateStart);
+    const oDateEnd = new Date(o.dateEnd);
+    if(oDateEnd>=startDate && oDateStart<=endDate){
+      found = true;
+      const card = document.createElement("div");
+      card.className="orang-card";
+      card.innerHTML=`<img src="${o.avatar}" alt="${o.gender}">
+        <h3>${o.name}</h3>
+        <p>Gender: ${o.gender}</p>
+        <p>Tujuan: ${tujuan}</p>
+        <p>Ready: ${o.dateStart}</p>
+        <p>No HP: ${o.phone}</p>`;
+      orangContainer.appendChild(card);
+    }
+  });
+
+  if(!found){
+    orangContainer.innerHTML = `<p style="background:rgba(255,255,255,0.8);padding:10px;border-radius:8px;">Tidak ada orang yang tersedia pada tanggal tersebut.</p>`;
+  }
+}
+
+function resetForm(){
+  document.getElementById("start-date").value="";
+  document.getElementById("end-date").value="";
+  document.getElementById("interest").selectedIndex=0;
+  document.getElementById("tujuanContainer").style.display="none";
+  document.getElementById("orangContainer").innerHTML="";
+  document.getElementById("orangContainer").style.display="none";
+}
+</script>
+</body>
+</html>
